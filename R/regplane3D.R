@@ -1,0 +1,26 @@
+#' regplane3D: Plotting regression predictions in 3D
+#'
+#' @section Description:
+#' The \code{regplane3D} package is a convenience wrapper for the
+#' \code{\link{plot3D}} package.
+#' \code{regplane3D} uses several \code{\link{plot3D}} functions to produce visually appealing
+#' three-dimensional displays of regression estimates with confidence intervals.
+#'
+#' @section Functions:
+#'
+#' \code{regplane3D} (development version 0.1.0) consists of three functions:
+#' \enumerate{
+#'   \item \code{plane3D}: Plot a three-dimensional regression prediction with confidence intervals.
+#'   \item \code{twoplanes3D}: Plot a three-dimensional regression prediction with two planes, typically separated at a cut point in one of the two horizontal dimensions, with their respective confidence intervals.
+#'   \item \code{heatmap3D}: Auxiliary function for adding three-dimensional heatmaps to plots produced by either \code{plane3D} or \code{twoplanes3D}. These heatmaps show the joint frequency/density distribution of the model predictors represented on the horizontal axes of the plots.
+#' }
+#'
+#' @seealso \code{\link{plot3D}}
+#' @seealso \code{\link{graphics}}
+#'
+#' @example man/examples/regplane3D.R
+#'
+#' @docType package
+#' @name regplane3D
+NULL
+#> NULL
