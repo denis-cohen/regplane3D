@@ -1,7 +1,7 @@
 #' regplane3D: Plotting regression predictions in 3D
 #'
 #' @section Description:
-#' The `regplane3D` package is a convenience wrapper for the
+#' The \code{regplane3D} package is a convenience wrapper for the
 #' \code{\link{plot3D}} package.
 #' \code{regplane3D} uses several \code{\link{plot3D}} functions to produce visually appealing
 #' three-dimensional displays of regression estimates with confidence intervals.
