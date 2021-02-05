@@ -25,7 +25,7 @@ three-dimensional displays of regression estimates with confidence intervals.
 
 \examples{
 \dontrun{
-example(regplane3D)
+example(plane3D)
 example(twoplanes3D)
 example(heatmap3D)
 }
