@@ -6,15 +6,18 @@
 #' of \code{x} and \code{y}.
 #' @param x A numeric vector of length \code{nrow(z) + 1}.
 #' @param y A numeric vector of length \code{ncol(z) + 1}.
-#' @param zlab Label for the vertical \code{z}-axis
-#' @param xlab Label for the horizontal \code{x}-axis
-#' @param ylab Label for the horizontal \code{y}-axis
 #' @param nlines Suggested number of lines for the grid. May be overridden.
 #' @param cols Color palette for the heatmap shadings.
-#' @param ... Additional arguments passed to the plotting methods. See
-#' \code{\link{persp3D}} and \code{\link{hist3D}}.
+#' @param cex.main The magnification to be used for main titles relative to the
+#' current setting of cex as in \code{\link[graphics]{par}}.
+#' @inheritParams graphics::persp
+#' @inheritParams plot3D::perspbox
+#' @inheritParams plot3D::hist3D
+#' @inheritParams graphics::par
 #'
 #' @return Returns, as invisible, the viewing transformation matrix.
+#'
+#' @example man/examples/heatmap3D.R
 #'
 #' @export
 #'
@@ -42,7 +45,7 @@ heatmap3D <- function(z,
                       d = 1.2,
                       add = FALSE) {
 
-  ## Check inputs
+    ## Check inputs
   if (!(is.matrix(z))) {
     stop("z: Please supply a matrix for z.")
   }
@@ -80,12 +83,12 @@ heatmap3D <- function(z,
   if (is.null(ylim)) {
     ylim <- range(y)
   }
-  if (any(is.na(cols))) {
-    col <- ramp.col(col = c("gray95", "gray20"),
-                    n = 100,
-                    alpha = .9)
+  if (any(is.null(cols))) {
+    col <- plot3D::ramp.col(col = c("gray95", "gray20"),
+                            n = 100,
+                            alpha = .9)
   } else {
-    col <- ramp.col(col = cols, n = 100, alpha = .9)
+    col <- plot3D::ramp.col(col = cols, n = 100, alpha = .9)
   }
   if (is.na(border)) {
     border <- "white"
@@ -93,7 +96,7 @@ heatmap3D <- function(z,
 
   ## Initialize plot (if isFALSE(add))
   if (isFALSE(add)) {
-    perspbox(
+    plot3D::perspbox(
       z = NULL,
       zlim = zlim,
       zlab = zlab,
@@ -122,7 +125,7 @@ heatmap3D <- function(z,
   }
 
   ## Draw histogram
-  hist3D (
+  plot3D::hist3D (
     x = x,
     y = y,
     z = z,
@@ -131,6 +134,6 @@ heatmap3D <- function(z,
     add = TRUE,
     plot = TRUE,
     colkey = FALSE,
-    lwd = 1
+    lwd = 2
   )
 }

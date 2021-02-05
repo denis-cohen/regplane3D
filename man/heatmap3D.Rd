@@ -36,24 +36,96 @@ of \code{x} and \code{y}.}
 
 \item{y}{A numeric vector of length \code{ncol(z) + 1}.}
 
-\item{zlab}{Label for the vertical \code{z}-axis}
+\item{zlab}{titles for the axes.  N.B. These must be
+    character strings; expressions are not accepted.  Numbers will be
+    coerced to character strings.}
 
-\item{xlab}{Label for the horizontal \code{x}-axis}
+\item{xlab}{titles for the axes.  N.B. These must be
+    character strings; expressions are not accepted.  Numbers will be
+    coerced to character strings.}
 
-\item{ylab}{Label for the horizontal \code{y}-axis}
+\item{ylab}{titles for the axes.  N.B. These must be
+    character strings; expressions are not accepted.  Numbers will be
+    coerced to character strings.}
+
+\item{zlim}{x-, y-  and z-limits.  These should be chosen
+    to cover the range of values of the surface: see \sQuote{Details}.}
+
+\item{xlim}{x-, y-  and z-limits.  These should be chosen
+    to cover the range of values of the surface: see \sQuote{Details}.}
+
+\item{ylim}{x-, y-  and z-limits.  These should be chosen
+    to cover the range of values of the surface: see \sQuote{Details}.}
 
 \item{nlines}{Suggested number of lines for the grid. May be overridden.}
 
 \item{cols}{Color palette for the heatmap shadings.}
 
-\item{...}{Additional arguments passed to the plotting methods. See
-\code{\link{persp3D}} and \code{\link{hist3D}}.}
+\item{border}{the color of the line drawn around the surface facets.
+    The default, \code{NULL}, corresponds to \code{par("fg")}.
+    A value of \code{NA} will disable the drawing of borders: this is
+    sometimes useful when the surface is shaded.}
+
+\item{main}{main and sub title, as for \code{\link[graphics]{title}}.}
+
+\item{cex.main}{The magnification to be used for main titles relative to the
+current setting of cex as in \code{\link[graphics]{par}}.}
+
+\item{nticks}{the (approximate) number of tick marks to draw on the
+    axes.  Has no effect if \code{ticktype} is \code{"simple"}.}
+
+\item{expand}{a expansion factor applied to the \code{z}
+    coordinates. Often used with \code{0 < expand < 1} to shrink the
+    plotting box in the \code{z} direction.}
+
+\item{theta}{angles defining the viewing direction.
+    \code{theta} gives the azimuthal direction and \code{phi}
+    the colatitude.}
+
+\item{phi}{angles defining the viewing direction.
+    \code{theta} gives the azimuthal direction and \code{phi}
+    the colatitude.}
+
+\item{r}{the distance of the eyepoint from the centre of the plotting box.}
+
+\item{d}{a value which can be used to vary the strength of
+    the perspective transformation.  Values of \code{d} greater
+    than 1 will lessen the perspective effect and values less
+    and 1 will exaggerate it.}
+
+\item{add}{Logical. If \code{TRUE}, then the surfaces will be added to the current plot.
+    If \code{FALSE} a new plot is started. 
+    }
 }
 \value{
 Returns, as invisible, the viewing transformation matrix.
 }
 \description{
 Add a three-dimensional histogram/heatmap
+}
+\examples{
+## --- Data inputs ---
+growth_cat_vals <- seq(-4, 6, 2)
+approval_cat_vals <-  seq(30, 80, 10)
+growth_cat <- cut(us$growth, breaks = growth_cat_vals )
+approval_cat <- cut(us$approval, breaks = approval_cat_vals)
+joint_frequency <- table(growth_cat, approval_cat)
+
+## ---- Plot ----
+heatmap3D(
+  z = joint_frequency,
+  x = growth_cat_vals,
+  y = approval_cat_vals,
+  zlab = "Frequency",
+  xlab = "Economic Growth",
+  ylab = "Approval Rating",
+  zlim = range(joint_frequency),
+  xlim = range(growth_cat_vals),
+  ylim = range(approval_cat_vals),
+  main = "Economic Growth and Presidential Approval",
+  theta = 225,
+  phi = 15
+)
 }
 \seealso{
 \code{\link{plot3D}}

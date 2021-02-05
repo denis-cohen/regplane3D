@@ -16,12 +16,6 @@
 #' \code{z} for the second plane.
 #' @param y2 A vector of \code{y}-values, matching the second dimension of
 #' \code{z} for the second plane.
-#' @param zlab Label for the vertical \code{z}-axis.
-#' @param xlab Label for the horizontal \code{x}-axis.
-#' @param ylab Label for the horizontal \code{y}-axis.
-#' @param zlim Range of the \code{z}-axis.
-#' @param xlim Range of the \code{x}-axis.
-#' @param ylim Range of the \code{y}-axis.
 #' @param cis Plot confidence intervals? Defaults to \code{TRUE}.
 #' @param nlines Suggested number of lines for the grid display of the
 #' regression plane. May be overridden.
@@ -50,8 +44,14 @@
 #' plane if \code{xplane_aux == TRUE}.
 #' @param xplane_aux_col User-specified color of auxiliary vertical reference
 #' plane if \code{xplane_aux == TRUE}.
-#' @param ... Additional arguments passed to the plotting methods. See
-#' \code{\link{persp3D}} and \code{\link{persp}}.
+#' @param cex.main The magnification to be used for main titles relative to the
+#' current setting of cex as in \code{\link[graphics]{par}}.
+#' @inheritParams graphics::persp
+#' @inheritParams plot3D::perspbox
+#' @inheritParams plot3D::image3D
+#' @inheritParams plot3D::scatter3D
+#' @inheritParams plot3D::persp3D
+#' @inheritParams graphics::par
 #'
 #' @return  Returns, as invisible, the viewing transformation matrix.
 #'
@@ -79,7 +79,7 @@ twoplanes3D <- function(z,
                         cis = TRUE,
                         nlines = 5,
                         heatmap = NULL,
-                        heatmap_cols = NA,
+                        heatmap_cols = NULL,
                         heatmap_border = NA,
                         plane0 = FALSE,
                         zplane_aux = FALSE,
@@ -100,9 +100,6 @@ twoplanes3D <- function(z,
                         r = sqrt(3),
                         d = 1.2) {
 
-  ## Load plot3D package
-  library("plot3D")
-
   ## Check inputs
   if (cis) {
     if (!(is.array(z) & length(dim(z)) == 3L & dim(z)[3] == 3L)) {
@@ -113,9 +110,7 @@ twoplanes3D <- function(z,
     }
   } else {
     if (!((is.array(z) & length(dim(z)) == 2L | is.matrix(z)))) {
-      stop(
-        "z: Please supply a two-dimensional array or a matrix."
-      )
+      stop("z: Please supply a two-dimensional array or a matrix.")
     }
     z <- array(z, dim = c(dim(z), 1L))
   }
@@ -136,17 +131,17 @@ twoplanes3D <- function(z,
     }
   } else {
     if (!((is.array(z2) & length(dim(z2)) == 2L | is.matrix(z2)))) {
-      stop(
-        "z2: Please supply a two-dimensional array or a matrix."
-      )
+      stop("z2: Please supply a two-dimensional array or a matrix.")
     }
     z2 <- array(z2, dim = c(dim(z2), 1L))
   }
-  if (!(is.vector(x2) & is.numeric(x2) & length(x2) == dim(z2)[1])) {
+  if (!(is.vector(x2) &
+        is.numeric(x2) & length(x2) == dim(z2)[1])) {
     stop("x2: Please supply a numeric vector of equal length as the first
          dimension of z2.")
   }
-  if (!(is.vector(y2) & is.numeric(y2) & length(y2) == dim(z2)[2])) {
+  if (!(is.vector(y2) &
+        is.numeric(y2) & length(y2) == dim(z2)[2])) {
     stop("y2: Please supply a numeric vector of equal length as the second
          dimension of z2.")
   }
@@ -185,11 +180,11 @@ twoplanes3D <- function(z,
     xlim <- c(min(c(min(x), min(x2))), max(c(max(x), max(x2))))
   }
   if (is.null(ylim)) {
-    ylim <- c(min(c(min(y), min(y2))), may(c(may(y), may(y2))))
+    ylim <- c(min(c(min(y), min(y2))), max(c(max(y), max(y2))))
   }
 
   ## Initialize plot
-  perspbox(
+  plot3D::perspbox(
     z = NULL,
     zlim = zlim,
     zlab = zlab,
@@ -237,12 +232,12 @@ twoplanes3D <- function(z,
   if (isTRUE(plane0)) {
     p0.x <- seq(min(x), max(x), length.out = nticks)
     p0.y <- seq(min(y), max(y), length.out = nticks)
-    image3D(
+    plot3D::image3D(
       x = p0.x,
       y = p0.y,
       z = 0,
-      col = adjustcolor("rosybrown1", alpha.f = 0.1),
-      border = adjustcolor("white", alpha.f = 0.5),
+      col = grDevices::adjustcolor("rosybrown1", alpha.f = 0.1),
+      border = grDevices::adjustcolor("white", alpha.f = 0.5),
       lwd = 2,
       add = T
     )
@@ -254,18 +249,20 @@ twoplanes3D <- function(z,
       stop("zplane_aux_pos: Please supply a z-value for the vertical position.")
     }
     if (is.null(zplane_aux_col)) {
-      zplane_aux_col <- adjustcolor("rosybrown1", alpha.f = 0.1)
+      zplane_aux_col <-
+        grDevices::adjustcolor("rosybrown1", alpha.f = 0.1)
     } else {
-      zplane_aux_col <- adjustcolor(zplane_aux_col, alpha.f = 0.1)
+      zplane_aux_col <-
+        grDevices::adjustcolor(zplane_aux_col, alpha.f = 0.1)
     }
     p_aux.x <- seq(xlim[1], xlim[2], length.out = nticks)
     p_aux.y <- seq(ylim[1], ylim[2], length.out = nticks)
-    image3D(
+    plot3D::image3D(
       x = p_aux.x,
       y = p_aux.y,
       z = zplane_aux_pos,
       col = zplane_aux_col,
-      border = adjustcolor("white", alpha.f = 0.5),
+      border = grDevices::adjustcolor("white", alpha.f = 0.5),
       lwd = 2,
       add = T
     )
@@ -277,18 +274,20 @@ twoplanes3D <- function(z,
       stop("yplane_aux_pos: Please supply an x-value for the horizontal position.")
     }
     if (is.null(yplane_aux_col)) {
-      yplane_aux_col <- adjustcolor("rosybrown1", alpha.f = 0.1)
+      yplane_aux_col <-
+        grDevices::adjustcolor("rosybrown1", alpha.f = 0.1)
     } else {
-      yplane_aux_col <- adjustcolor(yplane_aux_col, alpha.f = 0.1)
+      yplane_aux_col <-
+        grDevices::adjustcolor(yplane_aux_col, alpha.f = 0.1)
     }
     p_aux.x <- seq(xlim[1], xlim[2], length.out = nticks)
     p_aux.z <- seq(zlim[1], zlim[2], length.out = nticks)
-    image3D(
+    plot3D::image3D(
       x = p_aux.x,
       y = yplane_aux_pos,
       z = p_aux.z,
       col = yplane_aux_col,
-      border = adjustcolor("white", alpha.f = 0.5),
+      border = grDevices::adjustcolor("white", alpha.f = 0.5),
       lwd = 2,
       add = T
     )
@@ -298,18 +297,20 @@ twoplanes3D <- function(z,
       stop("xplane_aux_pos: Please supply a y-value for the horizontal position.")
     }
     if (is.null(xplane_aux_col)) {
-      xplane_aux_col <- adjustcolor("rosybrown1", alpha.f = 0.1)
+      xplane_aux_col <-
+        grDevices::adjustcolor("rosybrown1", alpha.f = 0.1)
     } else {
-      xplane_aux_col <- adjustcolor(xplane_aux_col, alpha.f = 0.1)
+      xplane_aux_col <-
+        grDevices::adjustcolor(xplane_aux_col, alpha.f = 0.1)
     }
     p_aux.z <- seq(zlim[1], zlim[2], length.out = nticks)
     p_aux.y <- seq(ylim[1], ylim[2], length.out = nticks)
-    image3D(
+    plot3D::image3D(
       x = xplane_aux_pos,
       y = p_aux.y,
       z = p_aux.z,
       col = xplane_aux_col,
-      border = adjustcolor("white", alpha.f = 0.5),
+      border = grDevices::adjustcolor("white", alpha.f = 0.5),
       lwd = 2,
       add = T
     )
@@ -321,7 +322,7 @@ twoplanes3D <- function(z,
     xx <- rep(points.x[k], length.x)
     yy <- y
     zz <- z[which(x == points.x[k]), , 1]
-    scatter3D(
+    plot3D::scatter3D(
       z = zz,
       x = xx,
       y = yy,
@@ -335,11 +336,11 @@ twoplanes3D <- function(z,
       for (p in 2:3) {
         xx <- rep(min(x), length.x)
         zz <- z[1, , p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz,
           x = xx,
           y = yy,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -347,11 +348,11 @@ twoplanes3D <- function(z,
         )
         xx <- rep(max(x), length.x)
         zz <- z[length(x), , p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz,
           x = xx,
           y = yy,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -366,7 +367,7 @@ twoplanes3D <- function(z,
     xx <- x
     yy <- rep(points.y[k], length.y)
     zz <- z[, which(y == points.y[k]), 1]
-    scatter3D(
+    plot3D::scatter3D(
       z = zz,
       x = xx,
       y = yy,
@@ -380,11 +381,11 @@ twoplanes3D <- function(z,
       for (p in 2:3) {
         yy <- rep(min(y), length.y)
         zz <- z[, 1, p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz,
           x = xx,
           y = yy,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -392,11 +393,11 @@ twoplanes3D <- function(z,
         )
         yy <- rep(max(y), length.y)
         zz <- z[, length(y), p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz,
           x = xx,
           y = yy,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -412,7 +413,7 @@ twoplanes3D <- function(z,
     xx2 <- rep(points.x2[k], length.x2)
     yy2 <- y2
     zz2 <- z2[which(x2 == points.x2[k]), , 1]
-    scatter3D(
+    plot3D::scatter3D(
       z = zz2,
       x = xx2,
       y = yy2,
@@ -426,11 +427,11 @@ twoplanes3D <- function(z,
       for (p in 2:3) {
         xx2 <- rep(min(x2), length.x2)
         zz2 <- z2[1, , p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz2,
           x = xx2,
           y = yy2,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -438,11 +439,11 @@ twoplanes3D <- function(z,
         )
         xx2 <- rep(max(x2), length.x2)
         zz2 <- z2[length(x2), , p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz2,
           x = xx2,
           y = yy2,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -457,7 +458,7 @@ twoplanes3D <- function(z,
     xx2 <- x2
     yy2 <- rep(points.y2[k], length.y2)
     zz2 <- z2[, which(y2 == points.y2[k]), 1]
-    scatter3D(
+    plot3D::scatter3D(
       z = zz2,
       x = xx2,
       y = yy2,
@@ -471,11 +472,11 @@ twoplanes3D <- function(z,
       for (p in 2:3) {
         yy2 <- rep(min(y2), length.y2)
         zz2 <- z2[, 1, p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz2,
           x = xx2,
           y = yy2,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -483,11 +484,11 @@ twoplanes3D <- function(z,
         )
         yy2 <- rep(max(y2), length.y2)
         zz2 <- z2[, length(y2), p]
-        scatter3D(
+        plot3D::scatter3D(
           z = zz2,
           x = xx2,
           y = yy2,
-          col = adjustcolor("gray80", alpha.f = 0.04),
+          col = grDevices::adjustcolor("gray80", alpha.f = 0.04),
           lwd = 0.5,
           lty = 1,
           type = 'l',
@@ -497,26 +498,29 @@ twoplanes3D <- function(z,
     }
   }
   if (cis) {
-    persp3D(x,
-            y,
-            z[, , 2],
-            col = adjustcolor("gray40", alpha.f = 0.07),
-            add = T)
-    persp3D(x,
-            y,
-            z[, , 3],
-            col = adjustcolor("gray40", alpha.f = 0.07),
-            add = T)
-    persp3D(x2,
-            y2,
-            z2[, , 2],
-            col = adjustcolor("gray40", alpha.f = 0.07),
-            add = T)
-    persp3D(x2,
-            y2,
-            z2[, , 3],
-            col = adjustcolor("gray40", alpha.f = 0.07),
-            add = T)
+    plot3D::persp3D(x,
+                    y,
+                    z[, , 2],
+                    col = grDevices::adjustcolor("gray40", alpha.f = 0.07),
+                    add = T)
+    plot3D::persp3D(x,
+                    y,
+                    z[, , 3],
+                    col = grDevices::adjustcolor("gray40", alpha.f = 0.07),
+                    add = T)
+    plot3D::persp3D(
+      x2,
+      y2,
+      z2[, , 2],
+      col = grDevices::adjustcolor("gray40", alpha.f = 0.07),
+      add = T
+    )
+    plot3D::persp3D(
+      x2,
+      y2,
+      z2[, , 3],
+      col = grDevices::adjustcolor("gray40", alpha.f = 0.07),
+      add = T
+    )
   }
 }
-

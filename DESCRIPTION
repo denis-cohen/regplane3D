@@ -2,21 +2,27 @@ Package: regplane3D
 Type: Package
 Title: Plotting regression predictions in 3D
 Version: 0.1.0
-Author: c(
-  person("Denis", "Cohen", email = "denis.cohen@mzes.uni-mannheim.de <denis.cohen@mzes.uni-mannheim.de", role = c("cre","aut")),
-  person("Nick", "Baumann", email = "nbaumann@mail.uni-mannheim.de", role = c("com", "ctb")))
+Authors@R: 
+    c(person(given = "Denis", 
+             family = "Cohen", 
+             email = "denis.cohen@mzes.uni-mannheim.de", 
+             role = c("cre","aut")),
+      person(given = "Nick", 
+             family = "Baumann", 
+             email = "nbaumann@mail.uni-mannheim.de",
+             role = c("ctb")))
 Description: \code{regplane3D}is a convenience tool for plotting regression predictions in 3D, based on the \code{\link{plot3D}} packge. It plots grid of conditional expectations in three dimensional space, optionally with their respective confidence intervals (\code{regplane3D}, \code{twoplanes3D}). User can optionally add a threedimensional histogram at the bottom of the plot.
+Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Language: en-US
-URL: https://github.com/NickBaumann97/RegPlane3D_test
-BugReports: https://github.com/NickBaumann97/RegPlane3D_test/issues
+URL: https://github.com/denis-cohen/regplane3D
+BugReports: https://github.com/denis-cohen/regplane3D/issues
 VignetteBuilder:
     knitr
 Imports:
     plot3D (>= 1.3)
 Suggests: 
-    knitr,
-    rmarkdown
+    knitr
