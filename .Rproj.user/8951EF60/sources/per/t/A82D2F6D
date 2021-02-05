@@ -1,0 +1,24 @@
+{
+    "id": "A82D2F6D",
+    "path": "~/GitHub/regplane3D/R/regplane3D.R",
+    "project_path": "R/regplane3D.R",
+    "type": "r_source",
+    "hash": "3461539664",
+    "contents": "",
+    "dirty": false,
+    "created": 1612531623429.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "cursorPosition": "26,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1612533605,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1612533605167,
+    "read_only": false,
+    "read_only_alternatives": []
+}
