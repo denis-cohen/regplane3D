@@ -1,0 +1,1 @@
+devtools::install_github("denis-cohen/regplane3D", auth_token = "92e8091c8c39d2ea8a85dc5797bf550311b14be1")
