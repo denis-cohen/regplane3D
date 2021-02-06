@@ -51,7 +51,7 @@ library(regplane3D)
 The use of `regplane3D` functions requires that users provide the following inputs:
 
 1. A vector containing a sequence of values for the first predictor, $X$.
-1. A vector containing a sequence of values for second predictor, $Y$.
+1. A vector containing a sequence of values for the second predictor, $Y$.
 1. A matrix containing the expected values of $Z$, or an array containing the expected values as well as their lower and upper confidence interval bounds, for all combinations of the specified values for $X$ and $Y$.
 1. *Optional*: A matrix containing the discretized joint density or joint frequency of $X$ and $Y$.
 
@@ -60,10 +60,10 @@ We illustrate how these inputs can be generated in some applied examples below.
 # Using regplane3D functions
 
 We will illustrate the use of `regplane3D`'s functions using the package's
-internal data set `us`, a small data set containing information of incumbent
+internal data set `us`, a small data set containing information on incumbent
 vote shares, approval ratings, and economic growth rates in
 US Presidential Elections 1948-2004.
-For a documentation of the data, run `?regplane3D::us`.
+For a documentation of the data, see `?regplane3D::us`.
 
 ## plane3D()
 
@@ -96,7 +96,7 @@ round_range <- function(x, base) {
 }
 ```
 
-We then generate sequences of `length.out = 21L` equally spaced values for each
+We then generate sequences of 21 equally spaced values for each
 of the two predictors and store them in the objects `growth_seq` and
 `approval_seq`, respectively.
 
@@ -167,7 +167,7 @@ plane3D(
   xlim = growth_range,
   ylim = approval_range,
   cis = TRUE,
-  nlines = 7,
+  nlines = 6,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9
@@ -195,7 +195,7 @@ approval_cat <-
 joint_frequency <- table(growth_cat, approval_cat)
 ```
 
-We can then add the threedimensional heatmap by adding the option
+We can then add the three-dimensional heatmap by adding the option
 `heatmap = joint_frequency` to our `plane3D()` command:
 
 ```{r use-plane3D-step5, fig.width=6.5, fig.height=5, out.width='80%', fig.align='center', dpi=300}
@@ -212,7 +212,7 @@ plane3D(
   xlim = growth_range,
   ylim = approval_range,
   cis = TRUE,
-  nlines = 7,
+  nlines = 6,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9,
@@ -240,7 +240,7 @@ plane3D(
   xlim = growth_range,
   ylim = approval_range,
   cis = TRUE,
-  nlines = 7,
+  nlines = 6,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9,
@@ -276,17 +276,18 @@ We showcase the function by replicating the empirical example introduced
 above, now with distinct regression predictions for incumbent presidents
 with above-average and below-average approval ratings, respectively.
 
-Estimation and prediction are not a bit more intricate. We interact both model
+### Estimation and prediction
+
+Estimation and prediction are now a bit more intricate as in the previous
+example. Here, we interact both model
 predictors with the binary indicator `approval_above_mean`. We then store
 expected values and confidence bounds across 21 values `growth_range` and
-21 values ranging from `min(centered_approval)` up to the cutpoint of
+21 values ranging from `min(centered_approval)` up to the cut point of
 0 in `pred[, , 1, ]` for the prediction with below-average approval ratings. 
 Analogously, we store this information for the prediction with above-average
 approval ratings in `pred[, , 2, ]`, where the 21 values of `centered_approval`
 now range from the cut point of up to `abs(min(centered_approval))` to provide
 for a symmetrical value range and display.
-
-### Estimation and prediction
 
 ```{r use-twoplanes3D-step1}
 ## ---- Estimation ----
@@ -340,7 +341,7 @@ for (growth in seq_along(growth_seq)) {
 Plotting with `twoplanes3D()` works the same way as with `plane3D()`, except
 we now must provide the $x$, $y$ and $z$ values separately for both planes.
 For this, we use the inputs `x` and `x2`, `y` and `y2`, as well as `z` and `z2`.
-Extensions can be added as with `plane3D()`.
+Extensions can be added in the same way as with `plane3D()`.
 
 ```{r use-twoplanes3D-step2, fig.width=6.5, fig.height=5, out.width='80%', fig.align='center', dpi=300}
 ## ---- Plot ----
@@ -359,7 +360,7 @@ twoplanes3D(
   xlim = growth_range,
   ylim = c(min(approval_seq), - min(approval_seq)),
   cis = TRUE,
-  nlines = 7,
+  nlines = 6,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -55,
   phi = 9
