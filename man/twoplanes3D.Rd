@@ -73,14 +73,14 @@ the second plane.}
     character strings; expressions are not accepted.  Numbers will be
     coerced to character strings.}
 
-\item{zlim}{x-, y-  and z-limits.  These should be chosen
-    to cover the range of values of the surface: see \sQuote{Details}.}
+\item{zlim}{\code{z}-limits. These should be chosen to cover the range of
+values of the surface: see \code{\link[graphics]{persp}}.}
 
-\item{xlim}{x-, y-  and z-limits.  These should be chosen
-    to cover the range of values of the surface: see \sQuote{Details}.}
+\item{xlim}{\code{x}-limits. These should be chosen to cover the range of
+values of the surface: see \code{\link[graphics]{persp}}.}
 
-\item{ylim}{x-, y-  and z-limits.  These should be chosen
-    to cover the range of values of the surface: see \sQuote{Details}.}
+\item{ylim}{\code{y}-limits. These should be chosen to cover the range of
+values of the surface: see \code{\link[graphics]{persp}}.}
 
 \item{xnlines}{Suggested number of lines for the grid display of the
 regression plane along the \code{x}-dimension. See

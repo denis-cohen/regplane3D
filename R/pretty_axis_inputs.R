@@ -28,9 +28,10 @@
 #' \url{https://www.mzes.uni-mannheim.de/socialsciencedatalab/article/regplane3D/}
 
 pretty_axis_inputs <- function(axis_range,
-                                  base = 1,
-                                  nlines_suggest = 5L,
-                                  multiply = 3) {
+                               base = 1,
+                               nlines_suggest = 5L,
+                               multiply = 3) {
+
   ## Determine range
   rounded_range <-
     c(base * floor(min(axis_range, na.rm = TRUE) / base),

@@ -9,6 +9,12 @@
 #' \code{z}.
 #' @param y A vector of \code{y}-values, matching the second dimension of
 #' \code{z}.
+#' @param zlim \code{z}-limits. These should be chosen to cover the range of
+#' values of the surface: see \code{\link[graphics]{persp}}.
+#' @param xlim \code{x}-limits. These should be chosen to cover the range of
+#' values of the surface: see \code{\link[graphics]{persp}}.
+#' @param ylim \code{y}-limits. These should be chosen to cover the range of
+#' values of the surface: see \code{\link[graphics]{persp}}.
 #' @param cis Plot confidence intervals? Defaults to \code{TRUE}.
 #' @param xnlines Suggested number of lines for the grid display of the
 #' regression plane along the \code{x}-dimension. See
