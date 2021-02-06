@@ -17,8 +17,12 @@
 #' @param y2 A vector of \code{y}-values, matching the second dimension of
 #' \code{z} for the second plane.
 #' @param cis Plot confidence intervals? Defaults to \code{TRUE}.
-#' @param nlines Suggested number of lines for the grid display of the
-#' regression plane. May be overridden.
+#' @param xnlines Suggested number of lines for the grid display of the
+#' regression plane along the \code{x}-dimension. See
+#' \code{\link{pretty_axis_inputs.}}.
+#' @param ynlines Suggested number of lines for the grid display of the
+#' regression plane along the \code{y}-dimension. See
+#' \code{\link{pretty_axis_inputs.}}.
 #' @param heatmap A two-dimensional matrix indicating the joint frequency
 #' distribution of \code{x} and \code{y}. Will displayed as a shaded histogram
 #' below the plot.
@@ -76,8 +80,9 @@ twoplanes3D <- function(z,
                         zlim = NULL,
                         xlim = NULL,
                         ylim = NULL,
+                        xnlines = 5,
+                        ynlines = 5,
                         cis = TRUE,
-                        nlines = 5,
                         heatmap = NULL,
                         heatmap_cols = NULL,
                         heatmap_border = NA,
@@ -93,7 +98,6 @@ twoplanes3D <- function(z,
                         xplane_aux_col = NULL,
                         main = NULL,
                         cex.main = 1,
-                        nticks = NULL,
                         expand = 0.8,
                         theta = 45,
                         phi = 0,
@@ -154,14 +158,12 @@ twoplanes3D <- function(z,
   length.y <- length(y)
   length.x2 <- length(x2)
   length.y2 <- length(y2)
-  nlines <- nlines
-  points.x <- x[round(seq(1, length(x), length.out = nlines))]
-  points.y <- y[round(seq(1, length(y), length.out = nlines))]
-  points.x2 <- x2[round(seq(1, length(x2), length.out = nlines))]
-  points.y2 <- y2[round(seq(1, length(y2), length.out = nlines))]
-  if (is.null(nticks)) {
-    nticks <- nlines
-  }
+  points.x <- x[round(seq(1, length(x), length.out = xnlines))]
+  points.y <- y[round(seq(1, length(y), length.out = ynlines))]
+  points.x2 <- x2[round(seq(1, length(x2), length.out = xnlines))]
+  points.y2 <- y2[round(seq(1, length(y2), length.out = ynlines))]
+  nticks <- max(xnlines, ynlines)
+
   if (is.null(zlim)) {
     zlim <- c(min(c(min(z), min(z2))), max(c(max(z), max(z2))))
   }
@@ -318,8 +320,8 @@ twoplanes3D <- function(z,
 
   ## ---- First plane ----
   ## Draw lines along first dimension
-  for (k in 1:nlines) {
-    xx <- rep(points.x[k], length.x)
+  for (k in 1:xnlines) {
+    xx <- rep(points.x[k], length.y)
     yy <- y
     zz <- z[which(x == points.x[k]), , 1]
     plot3D::scatter3D(
@@ -334,7 +336,7 @@ twoplanes3D <- function(z,
     )
     if (cis) {
       for (p in 2:3) {
-        xx <- rep(min(x), length.x)
+        xx <- rep(min(x), length.y)
         zz <- z[1, , p]
         plot3D::scatter3D(
           z = zz,
@@ -346,7 +348,7 @@ twoplanes3D <- function(z,
           type = 'l',
           add = T
         )
-        xx <- rep(max(x), length.x)
+        xx <- rep(max(x), length.y)
         zz <- z[length(x), , p]
         plot3D::scatter3D(
           z = zz,
@@ -363,9 +365,9 @@ twoplanes3D <- function(z,
   }
 
   ## Draw lines along second dimension
-  for (k in 1:nlines) {
+  for (k in 1:ynlines) {
     xx <- x
-    yy <- rep(points.y[k], length.y)
+    yy <- rep(points.y[k], length.x)
     zz <- z[, which(y == points.y[k]), 1]
     plot3D::scatter3D(
       z = zz,
@@ -379,7 +381,7 @@ twoplanes3D <- function(z,
     )
     if (cis) {
       for (p in 2:3) {
-        yy <- rep(min(y), length.y)
+        yy <- rep(min(y), length.x)
         zz <- z[, 1, p]
         plot3D::scatter3D(
           z = zz,
@@ -391,7 +393,7 @@ twoplanes3D <- function(z,
           type = 'l',
           add = T
         )
-        yy <- rep(max(y), length.y)
+        yy <- rep(max(y), length.x)
         zz <- z[, length(y), p]
         plot3D::scatter3D(
           z = zz,
@@ -409,8 +411,8 @@ twoplanes3D <- function(z,
 
   ## ---- Second plane ----
   ## Draw lines along first dimension
-  for (k in 1:nlines) {
-    xx2 <- rep(points.x2[k], length.x2)
+  for (k in 1:xnlines) {
+    xx2 <- rep(points.x2[k], length.y2)
     yy2 <- y2
     zz2 <- z2[which(x2 == points.x2[k]), , 1]
     plot3D::scatter3D(
@@ -425,7 +427,7 @@ twoplanes3D <- function(z,
     )
     if (cis) {
       for (p in 2:3) {
-        xx2 <- rep(min(x2), length.x2)
+        xx2 <- rep(min(x2), length.y2)
         zz2 <- z2[1, , p]
         plot3D::scatter3D(
           z = zz2,
@@ -437,7 +439,7 @@ twoplanes3D <- function(z,
           type = 'l',
           add = T
         )
-        xx2 <- rep(max(x2), length.x2)
+        xx2 <- rep(max(x2), length.y2)
         zz2 <- z2[length(x2), , p]
         plot3D::scatter3D(
           z = zz2,
@@ -454,9 +456,9 @@ twoplanes3D <- function(z,
   }
 
   ## Draw lines along second dimension
-  for (k in 1:nlines) {
+  for (k in 1:ynlines) {
     xx2 <- x2
-    yy2 <- rep(points.y2[k], length.y2)
+    yy2 <- rep(points.y2[k], length.x2)
     zz2 <- z2[, which(y2 == points.y2[k]), 1]
     plot3D::scatter3D(
       z = zz2,
@@ -470,7 +472,7 @@ twoplanes3D <- function(z,
     )
     if (cis) {
       for (p in 2:3) {
-        yy2 <- rep(min(y2), length.y2)
+        yy2 <- rep(min(y2), length.x2)
         zz2 <- z2[, 1, p]
         plot3D::scatter3D(
           z = zz2,
@@ -482,7 +484,7 @@ twoplanes3D <- function(z,
           type = 'l',
           add = T
         )
-        yy2 <- rep(max(y2), length.y2)
+        yy2 <- rep(max(y2), length.x2)
         zz2 <- z2[, length(y2), p]
         plot3D::scatter3D(
           z = zz2,

@@ -14,8 +14,9 @@ plane3D(
   zlim = NULL,
   xlim = NULL,
   ylim = NULL,
+  xnlines = 5L,
+  ynlines = 5L,
   cis = TRUE,
-  nlines = 5,
   heatmap = NULL,
   heatmap_cols = NULL,
   heatmap_border = NA,
@@ -25,7 +26,6 @@ plane3D(
   plane_aux_col = NULL,
   main = NULL,
   cex.main = 1,
-  nticks = NULL,
   expand = 0.8,
   theta = 45,
   phi = 0,
@@ -64,10 +64,15 @@ array of of point estimates and interval values.}
 \item{ylim}{x-, y-  and z-limits.  These should be chosen
     to cover the range of values of the surface: see \sQuote{Details}.}
 
-\item{cis}{Plot confidence intervals? Defaults to \code{TRUE}.}
+\item{xnlines}{Suggested number of lines for the grid display of the
+regression plane along the \code{x}-dimension. See
+\code{\link{pretty_axis_inputs.}}.}
 
-\item{nlines}{Suggested number of lines for the grid display of the
-regression plane. May be overridden.}
+\item{ynlines}{Suggested number of lines for the grid display of the
+regression plane along the \code{y}-dimension. See
+\code{\link{pretty_axis_inputs.}}.}
+
+\item{cis}{Plot confidence intervals? Defaults to \code{TRUE}.}
 
 \item{heatmap}{A two-dimensional matrix indicating the joint frequency
 distribution of \code{x} and \code{y}. Will displayed as a shaded histogram
@@ -92,9 +97,6 @@ Defaults to \code{FALSE}.}
 
 \item{cex.main}{The magnification to be used for main titles relative to the
 current setting of cex as in \code{\link[graphics]{par}}.}
-
-\item{nticks}{the (approximate) number of tick marks to draw on the
-    axes.  Has no effect if \code{ticktype} is \code{"simple"}.}
 
 \item{expand}{a expansion factor applied to the \code{z}
     coordinates. Often used with \code{0 < expand < 1} to shrink the
@@ -129,24 +131,36 @@ mod <- lm(vote ~
             approval,
           dat = us)
 
-## ---- Prediction ----
-growth_range <- c(-4, 6)
-approval_range <- c(30, 80)
-growth_seq <-
-  seq(growth_range[1], growth_range[2], length.out = 21L)
-approval_seq <-
-  seq(approval_range[1], approval_range[2], length.out = 21L)
+## ---- Axis inputs ----
+## Growth
+growth_axis <- pretty_axis_inputs(
+  axis_range = range(us$growth),
+  base = 2,
+  nlines_suggest = 6L,
+  multiply = 4
+)
 
-pred <- array(NA, dim = c(21L, 21L, 3L))
-for (growth in seq_along(growth_seq)) {
-  for (approval in seq_along(approval_seq)) {
+## Approval
+approval_axis <- pretty_axis_inputs(
+  axis_range = range(us$approval),
+  base = 10,
+  nlines_suggest = 6L,
+  multiply = 4
+)
+
+
+## ---- Prediction ----
+pred <-
+  array(NA, dim = c(length(growth_axis$seq), length(approval_axis$seq), 3L))
+for (growth in seq_along(growth_axis$seq)) {
+  for (approval in seq_along(approval_axis$seq)) {
     pred_tmp <- predict.lm(
       mod,
-      newdata = data.frame(growth = growth_seq[growth],
-                           approval = approval_seq[approval]),
+      newdata = data.frame(growth = growth_axis$seq[growth],
+                           approval = approval_axis$seq[approval]),
       se.fit = TRUE
     )
-    pred[growth, approval,] <- c(
+    pred[growth, approval, ] <- c(
       pred_tmp$fit,
       pred_tmp$fit + qnorm(.025) * pred_tmp$se.fit,
       pred_tmp$fit + qnorm(.975) * pred_tmp$se.fit
@@ -156,17 +170,18 @@ for (growth in seq_along(growth_seq)) {
 
 ## ---- Plot ----
 plane3D(
-  pred,
-  growth_seq,
-  approval_seq,
+  z = pred,
+  x = growth_axis$seq,
+  y = approval_axis$seq,
   zlab = "Predicted Vote Share",
   xlab = "Economic Growth",
   ylab = "Approval Rating",
   zlim = c(35, 70),
-  xlim = growth_range,
-  ylim = approval_range,
+  xlim = growth_axis$range,
+  ylim = approval_axis$range,
   cis = TRUE,
-  nlines = 7,
+  xnlines = growth_axis$nlines,
+  ynlines = approval_axis$nlines,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9

@@ -35,18 +35,29 @@ predictors, $X$ and $Y$, i.e., $\mathbb{E}(Z|X,Y)$.
 1. `plane3D`: Plot a three-dimensional regression prediction with confidence intervals.
 1. `twoplanes3D`: Plot a three-dimensional regression prediction with two planes, typically separated at a cut point in one of the two horizontal dimensions, with their respective confidence intervals.
 1. `heatmap3D`: Auxiliary function for adding three-dimensional heatmaps to plots produced by either `plane3D` or `twoplanes3D`. These heatmaps show the joint frequency/density distribution of the model predictors represented on the horizontal axes of the plots.
+1. `pretty_axis_inputs`: Auxiliary function for generating inputs for prediction and plotting to ensure that the grid lines of the perspective box and the lines of the grid lines of the regression planes match.
 
-# Installation
+`regplane3D` is developed and maintained by
+[Denis Cohen](https://twitter.com/denis_cohen) (author, creator) with the help
+of [Nick Baumann](https://twitter.com/Nick_Baumann97) (contributor).
+
+## Installation
 
 To install the latest development version of `regplane3D` from GitHub, run:
 
 ```{r, eval = FALSE}
+## devtools
+if (!("devtools" %in% installed.packages()))
+  install.packages("devtools")
 library(devtools)
-devtools::install_github("denis-cohen/regplane3D")
+
+## regplane3D
+if (!("regplane3D" %in% installed.packages()))
+  devtools::install_github("denis-cohen/regplane3D")
 library(regplane3D)
 ```
 
-# Prerequisites
+## Prerequisites
 
 The use of `regplane3D` functions requires that users provide the following inputs:
 
@@ -74,6 +85,63 @@ predictor. Our first example uses the `plane3D()` function to illustrate
 this in the context of an OLS regression of incumbent vote shares in US
 Presidential Elections on incumbent approval ratings and economic growth.
 
+### Definition axis inputs
+
+When using `regplane3D` plotting functions, it is recommended that users use
+`regplane3D::pretty_axis_inputs()` for defining axis inputs that should be used
+for *both* prediction *and* plotting.
+The reason for this requires some explanation. `regplane3D` plotting functions
+use `plot3D::perspbox()` to generate the perspective box inside which the
+plots are drawn. `plot3D::perspbox()` in turn depends on `graphics::persp()`,
+which uses the base R function `pretty()` to determine the number of ticks
+and reference lines of the perspective box. 
+
+As a result of these dependencies, users have limited control over the exact
+number and placement of ticks and reference lines. For instance, if users were to
+provide a variable ranging from 1.89 to 24.31 and request four ticks,
+this suggestion will be overridden with a rounded value range from 0 to 25 and
+a total of six ticks in integer steps of 5:
+
+```{r pretty-example}
+pretty(c(1.89, 24.31), n = 4)
+```
+
+Therefore, we recommend that users anticipate this particularity early on and
+define their axis inputs such that predictions and their visualization
+eventually conform to the grid lines of the perspective box. The function 
+`pretty_axis_inputs()` performs these tasks. It rounds value ranges to a
+custom base and provides the number and positions of the grid lines in the
+perspective box. These can then be used *before* the plot is generated to
+predict the regression plane at the corresponding values. To provide for
+smoother curves in plots involving curvilinear planes, the option `multiply`
+ensure that values of the plane are not only calculated at the intersections of
+the grid but at finer gradations.
+
+```{r growth-pretty}
+## Find range of variable
+growth_range <- range(us$growth)
+growth_range
+
+## Determine axis inputs
+growth_axis <- pretty_axis_inputs(
+  axis_range = growth_range,
+  base = 2,
+  nlines_suggest = 7L,
+  multiply = 4
+)
+growth_axis
+```
+
+The example below illustrates the functionality. The function takes extends the
+range of the variable `us$growth` (`r min(us$growth)`, `r max(us$growth)`) to a
+`base` of 2, such that the coarsened range is (-4, 6). We suggest that this 
+range be split into 7 equally spaced intervals. This is reject by the function,
+as such a division would not yield pretty values. Instead, the function returns
+`nlines = 6`, which means that the lines should be drawn at -4, -2, 0, 2, 4, and
+6. However, for finer predictions, we will not compute expected values as these
+coarse values, but (per `multiply = 4`) at gradations that divide each interval
+into four steps of 0.5.
+
 ### Estimation and prediction
 
 To obtain the required inputs, we first run a linear regression model of the form
@@ -85,56 +153,58 @@ and save the estimation results to an object named `mod`.
 mod <- lm(vote ~ growth + approval, dat = us)
 ```
 
-We then define roughly rounded ranges of our predictors `growth` and `approval`.
-For the sake of convenience, we use a little auxiliary function that allows us
-to round the range of a variable to a custom base value:
+We then use `pretty_axis_inputs()` to define the inputs for both axes. This
+gives us the sequence of values for each `growth` and `approval`. 
 
-```{r round-range}
-round_range <- function(x, base) {
-  c(base * floor(min(x, na.rm = TRUE) / base),
-    base * ceiling(max(x, na.rm = TRUE) / base))
-}
+```{r apply-pretty}
+## ---- Axis inputs ----
+## Growth
+growth_axis <- pretty_axis_inputs(
+  axis_range = range(us$growth),
+  base = 2,
+  nlines_suggest = 6L,
+  multiply = 1
+)
+
+## Approval
+approval_axis <- pretty_axis_inputs(
+  axis_range = range(us$approval),
+  base = 10,
+  nlines_suggest = 6L,
+  multiply = 1
+)
 ```
 
-We then generate sequences of 21 equally spaced values for each
-of the two predictors and store them in the objects `growth_seq` and
-`approval_seq`, respectively.
-
-For each of the $21 \times 21$ value combinations, we then retrieve the
-expected value and the lower and upper bounds of its 95% confidence interval
-using the `predict.lm()` function with option `se.fit = TRUE`. At each iteration
-of the nested loop, expected values are temporarily stored in
+For every combination of the values of these two sequences, we subsequently
+calculate the expected value and the lower and upper bounds of 
+its 95% confidence interval using the `predict.lm()` function with option
+`se.fit = TRUE`.
+At each iteration of the nested loop, expected values are temporarily stored in
 `pred_tmp$fit` and standard errors are temporarily stored in `pred_tmp$se.fit`.
 We can extract the expected value and calculate the lower and upper bounds of
 the 95% confidence interval at each iteration using
 `pred_tmp$fit + qnorm(.025) * pred_tmp$se.fit` and
 `pred_tmp$fit + qnorm(.975) * pred_tmp$se.fit`, respectively.
-We subsequently store the estimate of a givern iteration in the appropriate cell
+We subsequently store the estimate of a given iteration in the appropriate cell
 of the array `pred`.
-The array is of dimensions `dim = c(21L, 21L, 3L)`.
-The first dimension represents the values of `growth_seq`, the second dimension
-represents the values of `approval_seq`, and the third dimension represents the
+The array is of dimensions `dim = c(length(growth_axis$seq), length(approval_axis$seq), 3L)`.
+The first dimension represents the values of `growth_axis$seq`, the second dimension
+represents the values of `approval_axis$seq`, and the third dimension represents the
 point estimates, lower confidence bounds, and upper confidence bounds.
 
 ```{r use-plane3D-step2}
 ## ---- Prediction ----
-growth_range <- round_range(us$growth, 1)
-approval_range <- round_range(us$approval, 10)
-growth_seq <-
-  seq(growth_range[1], growth_range[2], length.out = 21L)
-approval_seq <-
-  seq(approval_range[1], approval_range[2], length.out = 21L)
-
-pred <- array(NA, dim = c(length(growth_seq), length(approval_seq), 3L))
-for (growth in seq_along(growth_seq)) {
-  for (approval in seq_along(approval_seq)) {
+pred <-
+  array(NA, dim = c(length(growth_axis$seq), length(approval_axis$seq), 3L))
+for (growth in seq_along(growth_axis$seq)) {
+  for (approval in seq_along(approval_axis$seq)) {
     pred_tmp <- predict.lm(
       mod,
-      newdata = data.frame(growth = growth_seq[growth],
-                           approval = approval_seq[approval]),
+      newdata = data.frame(growth = growth_axis$seq[growth],
+                           approval = approval_axis$seq[approval]),
       se.fit = TRUE
     )
-    pred[growth, approval,] <- c(
+    pred[growth, approval, ] <- c(
       pred_tmp$fit,
       pred_tmp$fit + qnorm(.025) * pred_tmp$se.fit,
       pred_tmp$fit + qnorm(.975) * pred_tmp$se.fit
@@ -143,11 +213,24 @@ for (growth in seq_along(growth_seq)) {
 }
 ```
 
+*Note:* The prediction step can (and should) be adopted to fit the requirements
+of a given
+empirical application. For instance, the calculation of expected values from
+generalized linear models requires the specification of scenarios for the
+covariate values, the application of an inverse link function, and the use of
+bootstrapping or parameter simulation for the construction of confidence
+intervals (though the last step may be skipped in favor of analytical
+confidence intervals based on normal approximation if the sampling distribution
+of the quantity of interest is approximately normal). For more information on
+the calculation of quantities of interest in generalized linear models, see
+the [Further reading](#further-reading) section.
+
 ### Plotting
 
 Using these estimates, we can then plot our regression plane using
 `plane3D()`.
-We pass the inputs `z = pred`, `x = growth_seq`, and `y = approval_seq` to the
+We pass the inputs `z = pred`, `x = growth_axis$seq`, and
+`y = approval_axis$seq` to the
 function, which contain all required information to plot the regression plane.
 The point estimate of the regression line is plotted by default.
 Confidence intervals are added per the option `cis = TRUE`.
@@ -158,16 +241,17 @@ For additional options, see `?plane3D`.
 par(mar = c(2.1, 2.1, 4.1, 0.1))
 plane3D(
   z = pred,
-  x = growth_seq,
-  y = approval_seq,
+  x = growth_axis$seq,
+  y = approval_axis$seq,
   zlab = "Predicted Vote Share",
   xlab = "Economic Growth",
   ylab = "Approval Rating",
-  zlim = round_range(pred, 5),
-  xlim = growth_range,
-  ylim = approval_range,
+  zlim = c(35, 70),
+  xlim = growth_axis$range,
+  ylim = approval_axis$range,
   cis = TRUE,
-  nlines = 6,
+  xnlines = growth_axis$nlines,
+  ynlines = approval_axis$nlines,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9
@@ -177,7 +261,7 @@ plane3D(
 ### Extensions
 
 The plot can be extended using `regplane3D::heatmap3D()`, which adds a
-threedimensional histogram to show the joint frequency or density distribution
+three-dimensional histogram to show the joint frequency or density distribution
 of `growth` and `approval`.
 Toward this end, we must first compute a matrix of the joint frequency along
 discrete intervals of the two continuous predictors. For appealing visuals,
@@ -188,10 +272,8 @@ from -4 to 6 in steps of 2:
 
 ```{r use-plane3D-step4}
 ## Heatmap values
-growth_cat <-
-  cut(us$growth, breaks = seq(growth_range[1], growth_range[2], 2))
-approval_cat <-
-  cut(us$approval, breaks = seq(approval_range[1], approval_range[2], 10))
+growth_cat <- cut(us$growth, breaks = growth_axis$seq)
+approval_cat <- cut(us$approval, breaks = approval_axis$seq)
 joint_frequency <- table(growth_cat, approval_cat)
 ```
 
@@ -201,18 +283,20 @@ We can then add the three-dimensional heatmap by adding the option
 ```{r use-plane3D-step5, fig.width=6.5, fig.height=5, out.width='80%', fig.align='center', dpi=300}
 ## ---- Plot ----
 par(mar = c(2.1, 2.1, 4.1, 0.1))
+par(mar = c(2.1, 2.1, 4.1, 0.1))
 plane3D(
   z = pred,
-  x = growth_seq,
-  y = approval_seq,
+  x = growth_axis$seq,
+  y = approval_axis$seq,
   zlab = "Predicted Vote Share",
   xlab = "Economic Growth",
   ylab = "Approval Rating",
-  zlim = round_range(pred, 5),
-  xlim = growth_range,
-  ylim = approval_range,
+  zlim = c(35, 70),
+  xlim = growth_axis$range,
+  ylim = approval_axis$range,
   cis = TRUE,
-  nlines = 6,
+  xnlines = growth_axis$nlines,
+  ynlines = approval_axis$nlines,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9,
@@ -231,16 +315,17 @@ using `plot3D::points3D()` and add text labels using `plot3D::text3D()`.
 par(mar = c(2.1, 2.1, 4.1, 0.1))
 plane3D(
   z = pred,
-  x = growth_seq,
-  y = approval_seq,
+  x = growth_axis$seq,
+  y = approval_axis$seq,
   zlab = "Predicted Vote Share",
   xlab = "Economic Growth",
   ylab = "Approval Rating",
-  zlim = round_range(pred, 5),
-  xlim = growth_range,
-  ylim = approval_range,
+  zlim = c(35, 70),
+  xlim = growth_axis$range,
+  ylim = approval_axis$range,
   cis = TRUE,
-  nlines = 6,
+  xnlines = growth_axis$nlines,
+  ynlines = approval_axis$nlines,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -45,
   phi = 9,
@@ -269,26 +354,31 @@ plot3D::text3D(
 The `twoplanes3D()` function extends the functionality of `plane3D()` to
 accommodate two separate planes. These are typically required when the
 model prediction is distinct to specific value ranges separated by a cut point
-in one of the two horizontal dimensions (akin to a discontinuity or binary
-spline).
+in one of the two horizontal dimensions, akin to a discontinuity or binary
+spline.
 
 We showcase the function by replicating the empirical example introduced
-above, now with distinct regression predictions for incumbent presidents
+above, now with distinct predictions for incumbent presidents
 with above-average and below-average approval ratings, respectively.
 
-### Estimation and prediction
+### Axis inputs, estimation and prediction
 
-Estimation and prediction are now a bit more intricate as in the previous
-example. Here, we interact both model
-predictors with the binary indicator `approval_above_mean`. We then store
-expected values and confidence bounds across 21 values `growth_range` and
-21 values ranging from `min(centered_approval)` up to the cut point of
+Axis inputs, estimation and prediction are now slightly more intricate than in 
+the previous example. First, we interact both model
+predictors with the binary indicator `approval_above_mean`.
+We then define the axis input for the cut axis (i.e., `centered_approval`) from
+its minimum value  up to the `cut_point`of 0. 
+We  store the expected values and confidence bounds across the values of
+`growth_axis$range`
+and approval values ranging from `min(centered_approval)` up to the cut point of
 0 in `pred[, , 1, ]` for the prediction with below-average approval ratings. 
 Analogously, we store this information for the prediction with above-average
-approval ratings in `pred[, , 2, ]`, where the 21 values of `centered_approval`
+approval ratings in `pred[, , 2, ]`, where the values of `centered_approval`
 now range from the cut point of up to `abs(min(centered_approval))` to provide
 for a symmetrical value range and display.
 
+<details>
+<summary> R code: Estimation and prediction</summary>
 ```{r use-twoplanes3D-step1}
 ## ---- Estimation ----
 mod <-
@@ -300,31 +390,45 @@ mod <-
        centered_approval:approval_above_mean,
      dat = us)
 
-## ---- Prediction ----
-approval_cut_point <- 0L
-growth_range <- round_range(us$growth, 1)
-approval_range <- round_range(us$centered_approval, 10)
+## ---- Axis inputs ----
+## Cut point
+cut_point <- 0
 approval_above_mean_vals <- c(0, 1)
-growth_seq <-
-  seq(growth_range[1], growth_range[2], length.out = 21L)
-approval_seq <-
-  seq(approval_range[1], approval_cut_point, length.out = 21L)
 
-pred <- array(NA, dim = c(length(growth_seq), length(approval_seq), 2L, 3L))
-for (growth in seq_along(growth_seq)) {
-  for (centered_approval in seq_along(approval_seq)) {
+## Growth
+growth_axis <- pretty_axis_inputs(
+  axis_range = range(us$growth),
+  base = 2,
+  nlines_suggest = 6L,
+  multiply = 1
+)
+
+## Approval
+approval_axis <- pretty_axis_inputs(
+  axis_range = c(min(us$centered_approval), cut_point),
+  base = 10,
+  nlines_suggest = 3L,
+  multiply = 1
+)
+
+## ---- Prediction ----
+pred <-
+  array(NA, dim = c(length(growth_axis$seq), length(approval_axis$seq), 2L, 3L))
+for (growth in seq_along(growth_axis$seq)) {
+  for (centered_approval in seq_along(approval_axis$seq)) {
     for (approval_above_mean in seq_along(approval_above_mean_vals)) {
       pred_tmp <- predict.lm(
         mod,
         newdata = data.frame(
-          growth = growth_seq[growth],
-          centered_approval = approval_seq[centered_approval] -
-            min(approval_seq) *
+          growth = growth_axis$seq[growth],
+          centered_approval = approval_axis$seq[centered_approval] -
+            min(approval_axis$seq) *
             approval_above_mean_vals[approval_above_mean],
           approval_above_mean = approval_above_mean_vals[approval_above_mean]
         ),
         se.fit = TRUE
       )
+
       pred[growth, centered_approval, approval_above_mean,] <-
         c(
           pred_tmp$fit,
@@ -335,6 +439,8 @@ for (growth in seq_along(growth_seq)) {
   }
 }
 ```
+</details>
+</br>
 
 ### Plotting
 
@@ -347,20 +453,21 @@ Extensions can be added in the same way as with `plane3D()`.
 ## ---- Plot ----
 par(mar = c(2.1, 2.1, 4.1, 0.1))
 twoplanes3D(
-  z = pred[, , 1, ],
-  x = growth_seq,
-  y = approval_seq,
-  z2 = pred[, , 2, ],
-  x2 = growth_seq ,
-  y2 = approval_seq - min(approval_seq),
+  z = pred[, , 1,],
+  x = growth_axis$seq,
+  y = approval_axis$seq,
+  z2 = pred[, , 2,],
+  x2 = growth_axis$seq,
+  y2 = approval_axis$seq - min(approval_axis$seq),
+  zlim = c(35, 70),
+  xlim = growth_axis$range,
+  ylim = c(min(approval_axis$seq),-min(approval_axis$seq)),
   zlab = "Predicted Vote Share",
   xlab = "Economic Growth",
   ylab = "Approval Rating \n Above & Below Average",
-  zlim = round_range(pred, 5),
-  xlim = growth_range,
-  ylim = c(min(approval_seq), - min(approval_seq)),
   cis = TRUE,
-  nlines = 6,
+  xnlines = growth_axis$nlines,
+  ynlines = approval_axis$nlines,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -55,
   phi = 9

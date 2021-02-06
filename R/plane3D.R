@@ -10,8 +10,12 @@
 #' @param y A vector of \code{y}-values, matching the second dimension of
 #' \code{z}.
 #' @param cis Plot confidence intervals? Defaults to \code{TRUE}.
-#' @param nlines Suggested number of lines for the grid display of the
-#' regression plane. May be overridden.
+#' @param xnlines Suggested number of lines for the grid display of the
+#' regression plane along the \code{x}-dimension. See
+#' \code{\link{pretty_axis_inputs.}}.
+#' @param ynlines Suggested number of lines for the grid display of the
+#' regression plane along the \code{y}-dimension. See
+#' \code{\link{pretty_axis_inputs.}}.
 #' @param heatmap A two-dimensional matrix indicating the joint frequency
 #' distribution of \code{x} and \code{y}. Will displayed as a shaded histogram
 #' below the plot.
@@ -53,8 +57,9 @@ plane3D <- function(z,
                     zlim = NULL,
                     xlim = NULL,
                     ylim = NULL,
+                    xnlines = 5L,
+                    ynlines = 5L,
                     cis = TRUE,
-                    nlines = 5,
                     heatmap = NULL,
                     heatmap_cols = NULL,
                     heatmap_border = NA,
@@ -64,7 +69,6 @@ plane3D <- function(z,
                     plane_aux_col = NULL,
                     main = NULL,
                     cex.main = 1,
-                    nticks = NULL,
                     expand = 0.8,
                     theta = 45,
                     phi = 0,
@@ -99,12 +103,10 @@ plane3D <- function(z,
   ## Extract meta information
   length.x <- length(x)
   length.y <- length(y)
-  nlines <- nlines
-  points.x <- x[round(seq(1, length(x), length.out = nlines))]
-  points.y <- y[round(seq(1, length(y), length.out = nlines))]
-  if (is.null(nticks)) {
-    nticks <- nlines
-  }
+  points.x <- x[round(seq(1, length(x), length.out = xnlines))]
+  points.y <- y[round(seq(1, length(y), length.out = ynlines))]
+  nticks <- max(xnlines, ynlines)
+
   if (is.null(zlim)) {
     zlim <- range(z)
   }
@@ -186,7 +188,7 @@ plane3D <- function(z,
     )
   }
 
-  ## Horizontal auxiliaray reference plane
+  ## Horizontal auxiliary reference plane
   if (isTRUE(plane_aux)) {
     if (is.null(plane_aux_pos)) {
       stop("plane_aux_pos: Please supply a z-value for the vertical position.")
@@ -212,8 +214,8 @@ plane3D <- function(z,
 
 
   ## Draw lines along first dimension
-  for (k in 1:nlines) {
-    xx <- rep(points.x[k], length.x)
+  for (k in 1:ynlines) {
+    xx <- rep(points.x[k], length.y)
     yy <- y
     zz <- z[which(x == points.x[k]), , 1]
     plot3D::scatter3D(
@@ -228,7 +230,7 @@ plane3D <- function(z,
     )
     if (cis) {
       for (p in 2:3) {
-        xx <- rep(min(x), length.x)
+        xx <- rep(min(x), length.y)
         zz <- z[1, , p]
         plot3D::scatter3D(
           z = zz,
@@ -240,7 +242,7 @@ plane3D <- function(z,
           type = 'l',
           add = T
         )
-        xx <- rep(max(x), length.x)
+        xx <- rep(max(x), length.y)
         zz <- z[length(x), , p]
         plot3D::scatter3D(
           z = zz,
@@ -257,9 +259,9 @@ plane3D <- function(z,
   }
 
   ## Draw lines along second dimension
-  for (k in 1:nlines) {
+  for (k in 1:xnlines) {
     xx <- x
-    yy <- rep(points.y[k], length.y)
+    yy <- rep(points.y[k], length.x)
     zz <- z[, which(y == points.y[k]), 1]
     plot3D::scatter3D(
       z = zz,
@@ -273,7 +275,7 @@ plane3D <- function(z,
     )
     if (cis) {
       for (p in 2:3) {
-        yy <- rep(min(y), length.y)
+        yy <- rep(min(y), length.x)
         zz <- z[, 1, p]
         plot3D::scatter3D(
           z = zz,
@@ -285,7 +287,7 @@ plane3D <- function(z,
           type = 'l',
           add = T
         )
-        yy <- rep(max(y), length.y)
+        yy <- rep(max(y), length.x)
         zz <- z[, length(y), p]
         plot3D::scatter3D(
           z = zz,

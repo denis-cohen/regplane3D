@@ -2,4 +2,5 @@
 
 export(heatmap3D)
 export(plane3D)
+export(pretty_axis_inputs)
 export(twoplanes3D)

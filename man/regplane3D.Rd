@@ -4,14 +4,12 @@
 \name{regplane3D}
 \alias{regplane3D}
 \title{regplane3D: Plotting regression predictions in 3D}
-\section{Description}{
-
+\description{
 The \code{regplane3D} package is a convenience wrapper for the
 \code{\link{plot3D}} package.
-\code{regplane3D} uses several \code{\link{plot3D}} functions to produce visually appealing
+\code{regplane3D} uses several \code{\link{plot3D}} functions to produce
 three-dimensional displays of regression estimates with confidence intervals.
 }
-
 \section{Functions}{
 
 
@@ -28,6 +26,7 @@ three-dimensional displays of regression estimates with confidence intervals.
 example(plane3D)
 example(twoplanes3D)
 example(heatmap3D)
+example(pretty_axis_inputs)
 }
 }
 \seealso{

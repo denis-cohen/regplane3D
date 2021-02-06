@@ -17,8 +17,9 @@ twoplanes3D(
   zlim = NULL,
   xlim = NULL,
   ylim = NULL,
+  xnlines = 5,
+  ynlines = 5,
   cis = TRUE,
-  nlines = 5,
   heatmap = NULL,
   heatmap_cols = NULL,
   heatmap_border = NA,
@@ -34,7 +35,6 @@ twoplanes3D(
   xplane_aux_col = NULL,
   main = NULL,
   cex.main = 1,
-  nticks = NULL,
   expand = 0.8,
   theta = 45,
   phi = 0,
@@ -82,10 +82,15 @@ the second plane.}
 \item{ylim}{x-, y-  and z-limits.  These should be chosen
     to cover the range of values of the surface: see \sQuote{Details}.}
 
-\item{cis}{Plot confidence intervals? Defaults to \code{TRUE}.}
+\item{xnlines}{Suggested number of lines for the grid display of the
+regression plane along the \code{x}-dimension. See
+\code{\link{pretty_axis_inputs.}}.}
 
-\item{nlines}{Suggested number of lines for the grid display of the
-regression plane. May be overridden.}
+\item{ynlines}{Suggested number of lines for the grid display of the
+regression plane along the \code{y}-dimension. See
+\code{\link{pretty_axis_inputs.}}.}
+
+\item{cis}{Plot confidence intervals? Defaults to \code{TRUE}.}
 
 \item{heatmap}{A two-dimensional matrix indicating the joint frequency
 distribution of \code{x} and \code{y}. Will displayed as a shaded histogram
@@ -130,9 +135,6 @@ plane if \code{xplane_aux == TRUE}.}
 \item{cex.main}{The magnification to be used for main titles relative to the
 current setting of cex as in \code{\link[graphics]{par}}.}
 
-\item{nticks}{the (approximate) number of tick marks to draw on the
-    axes.  Has no effect if \code{ticktype} is \code{"simple"}.}
-
 \item{expand}{a expansion factor applied to the \code{z}
     coordinates. Often used with \code{0 < expand < 1} to shrink the
     plotting box in the \code{z} direction.}
@@ -162,39 +164,55 @@ and their respective confidence intervals.
 }
 \examples{
 ## ---- Estimation ----
-mod <-
-  lm(vote ~
-       growth +
-       centered_approval +
-       approval_above_mean +
-       growth:approval_above_mean +
-       centered_approval:approval_above_mean,
-     dat = us)
+mod <- lm(
+  vote ~
+    growth +
+    centered_approval +
+    approval_above_mean +
+    growth:approval_above_mean +
+    centered_approval:approval_above_mean,
+  dat = us
+)
+
+## ---- Axis inputs ----
+## Cut point
+cut_point <- 0
+approval_above_mean_vals <- c(0, 1)
+
+## Growth
+growth_axis <- pretty_axis_inputs(
+  axis_range = range(us$growth),
+  base = 2,
+  nlines_suggest = 6L,
+  multiply = 4
+)
+
+## Approval
+approval_axis <- pretty_axis_inputs(
+  axis_range = c(min(us$centered_approval), cut_point),
+  base = 10,
+  nlines_suggest = 3L,
+  multiply = 4
+)
 
 ## ---- Prediction ----
-growth_range <- c(-4, 6)
-approval_range <- c(-20, 30)
-approval_above_mean_vals <- c(0, 1)
-growth_seq <-
-  seq(growth_range[1], growth_range[2], length.out = 21L)
-approval_seq <-
-  seq(approval_range[1], 0, length.out = 21L)
-
-pred <- array(NA, dim = c(21L, 21L, 2L, 3L))
-for (growth in seq_along(growth_seq)) {
-  for (centered_approval in seq_along(approval_seq)) {
+pred <-
+  array(NA, dim = c(length(growth_axis$seq), length(approval_axis$seq), 2L, 3L))
+for (growth in seq_along(growth_axis$seq)) {
+  for (centered_approval in seq_along(approval_axis$seq)) {
     for (approval_above_mean in seq_along(approval_above_mean_vals)) {
       pred_tmp <- predict.lm(
         mod,
         newdata = data.frame(
-          growth = growth_seq[growth],
-          centered_approval = approval_seq[centered_approval] -
-            min(approval_seq) *
+          growth = growth_axis$seq[growth],
+          centered_approval = approval_axis$seq[centered_approval] -
+            min(approval_axis$seq) *
             approval_above_mean_vals[approval_above_mean],
           approval_above_mean = approval_above_mean_vals[approval_above_mean]
         ),
         se.fit = TRUE
       )
+
       pred[growth, centered_approval, approval_above_mean,] <-
         c(
           pred_tmp$fit,
@@ -207,19 +225,21 @@ for (growth in seq_along(growth_seq)) {
 
 ## ---- Plot ----
 twoplanes3D(
-  z = pred[, , 1, ],
-  x = growth_seq,
-  y = approval_seq,
-  z2 = pred[, , 2, ],
-  x2 = growth_seq ,
-  y2 = approval_seq - min(approval_seq),
+  z = pred[, , 1,],
+  x = growth_axis$seq,
+  y = approval_axis$seq,
+  z2 = pred[, , 2,],
+  x2 = growth_axis$seq,
+  y2 = approval_axis$seq - min(approval_axis$seq),
+  zlim = c(35, 70),
+  xlim = growth_axis$range,
+  ylim = c(min(approval_axis$seq),-min(approval_axis$seq)),
   zlab = "Predicted Vote Share",
   xlab = "Economic Growth",
   ylab = "Approval Rating \n Above & Below Average",
-  zlim = c(30, 75),
-  xlim = growth_range,
-  ylim = c(min(approval_seq), -min(approval_seq)),
-  nlines = 7,
+  cis = TRUE,
+  xnlines = growth_axis$nlines,
+  ynlines = approval_axis$nlines,
   main = "Incumbent Vote Shares, Economic \n Growth, and Approval Ratings",
   theta = -55,
   phi = 9
