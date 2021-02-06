@@ -84,11 +84,11 @@ the second plane.}
 
 \item{xnlines}{Suggested number of lines for the grid display of the
 regression plane along the \code{x}-dimension. See
-\code{\link{pretty_axis_inputs.}}.}
+\code{\link{pretty_axis_inputs}}.}
 
 \item{ynlines}{Suggested number of lines for the grid display of the
 regression plane along the \code{y}-dimension. See
-\code{\link{pretty_axis_inputs.}}.}
+\code{\link{pretty_axis_inputs}}.}
 
 \item{cis}{Plot confidence intervals? Defaults to \code{TRUE}.}
 

@@ -18,6 +18,7 @@ three-dimensional displays of regression estimates with confidence intervals.
   \item \code{plane3D}: Plot a three-dimensional regression prediction with confidence intervals.
   \item \code{twoplanes3D}: Plot a three-dimensional regression prediction with two planes, typically separated at a cut point in one of the two horizontal dimensions, with their respective confidence intervals.
   \item \code{heatmap3D}: Auxiliary function for adding three-dimensional heatmaps to plots produced by either \code{plane3D} or \code{twoplanes3D}. These heatmaps show the joint frequency/density distribution of the model predictors represented on the horizontal axes of the plots.
+  \item \code{pretty_axis_inputs}: Auxiliary function for pre-processing the variables represented on the \code{x} and \code{y} axes. Helps ensure that the grid layout of the perspective box and the regression prediction are drawn at the same \code{x} and \code{y} values for a nicer display.
 }
 }
 

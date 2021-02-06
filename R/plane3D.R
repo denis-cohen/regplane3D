@@ -12,10 +12,10 @@
 #' @param cis Plot confidence intervals? Defaults to \code{TRUE}.
 #' @param xnlines Suggested number of lines for the grid display of the
 #' regression plane along the \code{x}-dimension. See
-#' \code{\link{pretty_axis_inputs.}}.
+#' \code{\link{pretty_axis_inputs}}.
 #' @param ynlines Suggested number of lines for the grid display of the
 #' regression plane along the \code{y}-dimension. See
-#' \code{\link{pretty_axis_inputs.}}.
+#' \code{\link{pretty_axis_inputs}}.
 #' @param heatmap A two-dimensional matrix indicating the joint frequency
 #' distribution of \code{x} and \code{y}. Will displayed as a shaded histogram
 #' below the plot.
