@@ -30,7 +30,7 @@ For example, the package can be used to  plot conditional expected values
 of an outcome variable $Z$ over the joint distribution of two continuous
 predictors, $X$ and $Y$, i.e., $\mathbb{E}(Z|X,Y)$.
 
-`regplane3D` (development version 0.1.0) consists of three functions:
+`regplane3D` (development version 0.1.0) consists of the following functions:
 
 1. `plane3D`: Plot a three-dimensional regression prediction with confidence intervals.
 1. `twoplanes3D`: Plot a three-dimensional regression prediction with two planes, typically separated at a cut point in one of the two horizontal dimensions, with their respective confidence intervals.
