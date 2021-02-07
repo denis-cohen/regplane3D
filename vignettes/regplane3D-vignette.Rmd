@@ -85,7 +85,7 @@ predictor. Our first example uses the `plane3D()` function to illustrate
 this in the context of an OLS regression of incumbent vote shares in US
 Presidential Elections on incumbent approval ratings and economic growth.
 
-### Definition axis inputs
+### Definition of axis inputs
 
 When using `regplane3D` plotting functions, it is recommended that users use
 `regplane3D::pretty_axis_inputs()` for defining axis inputs that should be used
@@ -117,6 +117,16 @@ smoother curves in plots involving curvilinear planes, the option `multiply`
 ensure that values of the plane are not only calculated at the intersections of
 the grid but at finer gradations.
 
+The example below illustrates the functionality. The function extends the
+range of the variable `us$growth` (`r min(us$growth)`, `r max(us$growth)`) to a
+`base` of 2, such that the coarsened range is (-4, 6). We suggest that this 
+range be split into 7 equally spaced intervals. This is rejected by the function,
+as such a division would not yield pretty values. Instead, the function returns
+`nlines = 6`, which means that the lines should be drawn at -4, -2, 0, 2, 4, and
+6. However, for finer predictions, we will not compute expected values as these
+coarse values, but (per `multiply = 4`) at gradations that divide each interval
+into four steps of 0.5.
+
 ```{r growth-pretty}
 ## Find range of variable
 growth_range <- range(us$growth)
@@ -131,16 +141,6 @@ growth_axis <- pretty_axis_inputs(
 )
 growth_axis
 ```
-
-The example below illustrates the functionality. The function takes extends the
-range of the variable `us$growth` (`r min(us$growth)`, `r max(us$growth)`) to a
-`base` of 2, such that the coarsened range is (-4, 6). We suggest that this 
-range be split into 7 equally spaced intervals. This is reject by the function,
-as such a division would not yield pretty values. Instead, the function returns
-`nlines = 6`, which means that the lines should be drawn at -4, -2, 0, 2, 4, and
-6. However, for finer predictions, we will not compute expected values as these
-coarse values, but (per `multiply = 4`) at gradations that divide each interval
-into four steps of 0.5.
 
 ### Estimation and prediction
 

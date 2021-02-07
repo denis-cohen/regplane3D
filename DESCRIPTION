@@ -1,6 +1,6 @@
 Package: regplane3D
 Type: Package
-Title: Plotting regression predictions in 3D
+Title: Plotting Regression Predictions in 3D
 Version: 0.1.0
 Authors@R: 
     c(person(given = "Denis", 
@@ -11,7 +11,7 @@ Authors@R:
              family = "Baumann", 
              email = "nbaumann@mail.uni-mannheim.de",
              role = c("ctb")))
-Description: \code{regplane3D}is a convenience tool for plotting regression predictions in 3D, based on the \code{\link{plot3D}} packge. It plots grid of conditional expectations in three dimensional space, optionally with their respective confidence intervals (\code{regplane3D}, \code{twoplanes3D}). User can optionally add a threedimensional histogram at the bottom of the plot.
+Description: The \code{regplane3D} package is a convenience tool for plotting regression predictions in 3D, based on the \code{\link{plot3D}} package. It plots grid of conditional expectations in three dimensional space, optionally with their respective confidence intervals (\code{regplane3D}, \code{twoplanes3D}). User can optionally add a threedimensional histogram at the bottom of the plot.
 Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
