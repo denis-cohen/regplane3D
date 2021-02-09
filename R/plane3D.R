@@ -220,7 +220,7 @@ plane3D <- function(z,
 
 
   ## Draw lines along first dimension
-  for (k in 1:ynlines) {
+  for (k in 1:xnlines) {
     xx <- rep(points.x[k], length.y)
     yy <- y
     zz <- z[which(x == points.x[k]), , 1]
@@ -265,7 +265,7 @@ plane3D <- function(z,
   }
 
   ## Draw lines along second dimension
-  for (k in 1:xnlines) {
+  for (k in 1:ynlines) {
     xx <- x
     yy <- rep(points.y[k], length.x)
     zz <- z[, which(y == points.y[k]), 1]
