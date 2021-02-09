@@ -4,8 +4,9 @@
 #' The function returns a rounded range for the axis (\code{range}),
 #' (possibly) an adjusted number of lines that ensure pretty display
 #' (\code{nlines}), and a value sequence for predictions that includes the values
-#' at which \code{z}-values for each line will be calculated and (if
-#' \code{multiply > 1}) equally space gradations inbetween (\code{seq}).
+#' at which the \code{z}-values for each line will be calculated and
+#' (\code{linevals}) and, if \code{multiply > 1}), a sequence of
+#' equally spaced value gradations for smoother prediction curves (\code{seq}).
 #'
 #' @param axis_range Value range of the variable displayed on either the
 #' \code{x}-axis or \code{y}-axis of a \code{regplane3D} plot.
@@ -13,10 +14,10 @@
 #' pretty display.
 #' @param nlines_suggest Suggested number of lines for the grid display of the
 #' regression plane. May be adjusted by the function to ensure pretty display.
-#' @param multiply Multiply
+#' @param multiply Define the number of intermediate steps between line values.
 #'
-#' @return Returns a list with three entries: \code{nlines}, \code{range},
-#' and
+#' @return Returns a list with four entries: \code{nlines}, \code{range},
+#' \code{linevals}, and \code{seq}.
 #'
 #' @example man/examples/pretty_axis_inputs.R
 #'
@@ -54,6 +55,7 @@ pretty_axis_inputs <- function(axis_range,
   return(list(
     range = rounded_range,
     seq = pretty_seq_lines,
+    linevals = pretty_seq_ticks,
     nlines = length(pretty_seq_ticks)
   ))
 }
