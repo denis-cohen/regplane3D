@@ -121,11 +121,16 @@ The example below illustrates the functionality. The function extends the
 range of the variable `us$growth` (`r min(us$growth)`, `r max(us$growth)`) to a
 `base` of 2, such that the coarsened range is (-4, 6). We suggest that this 
 range be split into 7 equally spaced intervals. This is rejected by the function,
-as such a division would not yield pretty values. Instead, the function returns
-`nlines = 6`, which means that the lines should be drawn at -4, -2, 0, 2, 4, and
-6. However, for finer predictions, we will not compute expected values as these
-coarse values, but (per `multiply = 4`) at gradations that divide each interval
-into four steps of 0.5.
+as such a division would not yield pretty values.
+Instead, the function returns
+`nlines = 6`, which means that the lines should be drawn at the reported
+`linevals` of -4, -2, 0, 2, 4, and 6.
+When plotting non-linear relationships, grid lines evaluated at such few values
+may look a little jerky. To obtain smoother predictions, we can compute our
+expected values not just at these coarse values but also at finer gradations
+in between. To accomplish this, we can for instance specify `multiply = 4`,
+which means that the `linevals` sequence in steps of two will be divided into
+a finer sequence in steps of 0.5, which is returned as `seq`.
 
 ```{r growth-pretty}
 ## Find range of variable
@@ -272,8 +277,8 @@ from -4 to 6 in steps of 2:
 
 ```{r use-plane3D-step4}
 ## Heatmap values
-growth_cat <- cut(us$growth, breaks = growth_axis$seq)
-approval_cat <- cut(us$approval, breaks = approval_axis$seq)
+growth_cat <- cut(us$growth, breaks = growth_axis$linevals)
+approval_cat <- cut(us$approval, breaks = approval_axis$linevals)
 joint_frequency <- table(growth_cat, approval_cat)
 ```
 
